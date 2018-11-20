@@ -1,0 +1,30 @@
+server:
+  port: 8081
+spring:
+  cloud:
+    stream:
+      binders:
+        defaultRabbit:
+          type: rabbit
+      defaultBinder: defaultRabbit
+      bindings:
+        inputBinding:
+          group: product-deadletter-queue
+        outputBinding:
+          producer:
+            required-groups: product-group #生产者exchange绑定队列
+      rabbit:
+        bindings:
+          outputBinding:
+            producer:
+              ttl: 3000 #消息3秒不消费转入私信队列
+              autoBindDlq: true #启动私信队列
+              deadLetterExchange: inputBinding #绑定exchange
+              deadLetterQueueName: inputBinding.product-deadletter-queue #死信队列名字：exchanName.queueName
+  application:
+    name: spring-cloud-stream-rabbitmq
+  rabbitmq:                  # 默认的 mq的配置时候，上述的配置方式，可以支持多个 broker
+    port: 5672
+    host: localhost
+    username: root
+    password: 123456
